@@ -12,7 +12,7 @@ with open("csv density.csv", "r") as csvfile:
         dict["land"] =  row[1]
         dict["density"] = row[6]
         print dict
-    json = json.dumps(dict)
+        json = json.dumps(dict)
     print json
     #json.file =
 

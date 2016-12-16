@@ -1,6 +1,4 @@
-
-
-// array of countrycodes
+// variable for country codes
 var codes = [
     ["af", "AFG", "Afghanistan"],
     ["ax", "ALA", "Åland Islands"],
@@ -251,57 +249,92 @@ var codes = [
     ["ye", "YEM", "Yemen"],
     ["zm", "ZMB", "Zambia"],
     ["zw", "ZWE", "Zimbabwe"] ];
-// get json of countries
-var countries = document.getElementById("json").value;
-// parse json
-json = JSON.parse(countries);
-// make dataset for fillkeys
-dataset = {}
-// give country fillkey
-for(p = 0; p < Number(json.points.length); p++)
-{
-	
-	if(json.points[p].density > 300)
-	{
-		
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "> 300", density: json.points[p].density};
-		
-	}
-	else if(json.points[p].density <= 300 && json.points[p].density > 100)
-	{
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "100 - 300", density: json.points[p].density};
-	}
-	else if(json.points[p].density <= 100 && json.points[p].density > 50)
-	{
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "50 - 100", density: json.points[p].density};
-	}
-	else if(json.points[p].density <= 50 && json.points[p].density > 20)
-	{
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "20 - 50", density: json.points[p].density};
-	}
-	else if(json.points[p].density <= 20 && json.points[p].density >= 10)
-	{
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "10 - 20", density: json.points[p].density};
-	}
-	else if(json.points[p].density < 10)
-	{
-		dataset[getcountrycode(json.points[p].land)] = {fillKey: "< 10", density: json.points[p].density};
-	}
 
-}
-// draw map
-var map = new Datamap({
-    console.log( "deze gaat wss fout")
+
+// margins scatter
+var margin = {top: 70, bottom: 150, left: 150, right: 50}
+// width scatter
+var width = 500.
+//height scatter
+var height = 500
+// svg scatter		
+var svg = d3.select("svg")  
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       
+// xaxis
+var xvalue = function(d){return d.area;},
+    xscale = d3.scale.linear().range([0, width]),
+    xmap = function(d){return xscale(xvalue(d));},
+    xaxis = d3.svg.axis().scale(xscale).orient("bottom");
+ 
+// y axis
+var yvalue = function(d){return d.population},
+    yscale = d3.scale.linear().range([height, 0])
+    ymap = function(d){return yscale(yvalue(d));},
+    yaxis = yaxis = d3.svg.axis().scale(yscale).orient("left");
+
+// tooltip
+var tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0)
+// make dataset for fillkeys
+var dataset = {}
+// open json with data
+d3.json("land.json", function(data){
+    // give fillkeys for colors in both graphs
+	for(p = 0; p < Number(data.length); p++)
+	{
+		data[p].density = Number(data[p].density);
+		if(data[p].density > 300)
+		{
+            // map
+			dataset[getcountrycode(data[p].land)] = {fillKey: "> 300", density: data[p].density};
+            // scatter
+            data[p].color = "#7a0177"   
+		}
+		else if(data[p].density <= 300 && data[p].density > 100)
+		{
+			dataset[getcountrycode(data[p].land)] = {fillKey: "100 - 300", density: data[p].density};
+            data[p].color = "#ae017e"
+		}
+		else if(data[p].density <= 100 && data[p].density > 50)
+		{
+			dataset[getcountrycode(data[p].land)] = {fillKey: "50 - 100", density: data[p].density};
+            data[p].color = "#dd3497"
+		}
+		else if(data[p].density <= 50 && data[p].density > 20)
+		{
+			dataset[getcountrycode(data[p].land)] = {fillKey: "20 - 50", density: data[p].density};
+            data[p].color = "#f768a1"
+		}
+		else if(data[p].density <= 20 && data[p].density >= 10)
+		{
+			dataset[getcountrycode(data[p].land)] = {fillKey: "10 - 20", density: data[p].density};
+            data[p].color = "fa9fb5"
+		}
+		else if(data[p].density < 10)
+		{
+			dataset[getcountrycode(data[p].land)] = {fillKey: "< 10", density: data[p].density};
+            data[p].color = "#fcc5c0"
+		}
+
+	}
+    // make datamap
+	var map = new Datamap({
 		// in container
         element: document.getElementById('container'),
         fills: {
         	// with fillcolors
-        	"> 300": "#99000d",
-        	"100 - 300": "#cb181d",
-        	"50 - 100": "#ef3b2c",
-        	"20 - 50": "#fb6a4a",
-        	"10 - 20": "#fc9272",
-        	"< 10": "#fcbba1",
+        	"> 300": "#7a0177",
+        	"100 - 300": "#ae017e",
+        	"50 - 100": "#dd3497",
+        	"20 - 50": "#f768a1",
+        	"10 - 20": "#fa9fb5",
+        	"< 10": "#fcc5c0",
         	"no data": "grey",
             defaultFill: "grey",    
         }, 
@@ -311,11 +344,83 @@ var map = new Datamap({
         geographyConfig: {
         popupTemplate: function(geography, dataset){
         	return '<div class="hoverinfo">' + geography.properties.name + ": " + "inhabitants per km²: " + dataset.density}
-        }       
+        },
     });
-// draw legend        
-map.legend();
+    // draw legend        
+    map.legend();
+    // delete annoying commas in data
+    data.forEach(function(d){
+        d.population = Number(d.population.replace(/,/g, ''));
+        d.area = Number(d.area.replace(/,/g, ''));
+    })
+    // domains for scatter data
+    xscale.domain([d3.min(data, xvalue) - 1, d3.max(data, xvalue) + 1]);
+    yscale.domain([d3.min(data, yvalue) - 1, d3.max(data, yvalue) + 1]);
+    // append xaxis
+    svg.append("g")
+          .attr("class", "axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xaxis)
+          .selectAll("text")
+          .attr("y", 0)
+          .attr("x", 9)
+          .attr("transform", "rotate(30)")
+          .style("text-anchor", "start")
+    // append text
+    svg.append("text")
+    .attr("y", 570)
+    .attr("x", 270)
+    .style("text-anchor", "middle")
+    .text("Area km²")
+    // append yaxis
+    svg.append("g")
+          .attr("class", "axis")
+          .call(yaxis)
+    // append text
+    svg.append("text")
+    .attr("y", 250)
+    .attr("x", -100)
+    .style("text-anchor", "middle")
+    .text("Population")
+    // append datadots
+    svg.selectAll(".dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            // give classname to change color with map
+            .attr("class", function(d){return getcountrycode(d.land) + "dot"})
+            .attr("r", 2)
+            .attr("cx", xmap)
+            .attr("cy", ymap)
+            .style("fill", function(data){return data.color;})
+            // show tooltip on mousover
+            .on("mouseover", function(d){
+                tooltip.transition()
+                .style("opacity", 9)
+                tooltip.html(d.land + ": Area: " + d.area + "km² Population: " + d.population)
+                .style("left", (d3.event.pageX + 20) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+            })
 
+    // define class to set dots back        
+    var clas = ""
+    // on click on country
+    map.svg.selectAll('.datamaps-subunit').on('click', function(geography, data) {
+            // if a dot is selected style it back
+            if (clas.length > 1){
+                d3.select(clas)
+                .style("r", 2)
+                .style("fill", function(data){return data.color;})
+            }
+            // select dot corresponding with country fill and make bigger 
+            alert(geography.properties.name);
+            classs = "." + geography.id + "dot"
+            clas = classs
+            d3.select(classs)
+            .style("r", 5)
+            .style("fill", "blue")
+        });	    
+});
 // function that takes country name and gives country code
 function getcountrycode(country){
 	for(i = 0; i < codes.length; i++)
@@ -326,4 +431,3 @@ function getcountrycode(country){
 		}	
 	}
 }
-

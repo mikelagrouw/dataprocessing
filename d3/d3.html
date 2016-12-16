@@ -1,0 +1,31 @@
+""mike la grouw 10626700""
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>D3</title>
+	<header>D3 Linked Views</header>
+	<header style="font-size: 34px; text-align: left">Population density per country in inhabitants/km²</header>
+	<style>
+.axis path,
+.axis line{
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+
+}
+</style>
+</head>
+<body>
+	<div id="container" style="position: relative; width: 750px; height: 450px;"></div>
+	<svg width="500" height="500"></svg>
+	<script src="//d3js.org/d3.v3.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+	<script src="http://datamaps.github.io/scripts/0.4.4/datamaps.world.min.js"></script>
+	<script src = "d3.js"></script>
+	<p>hier een wereldkaart met landen gekleurd naar population density. hoe donkerder oe meer mensen per vierkante km.
+		in de scatterplot zijn de landen geplot op area en absolute population. als er op een land geklikt word word de dot in de scatterplot gehighlight. helaas is het niet meer gelukt om nog een barchart er naast te maken die het land tov het gemiddelde zou weergeven.</p>
+	<a href="https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_population_density"> bron data</a>	
+</body>
+</html>

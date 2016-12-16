@@ -1,7 +1,7 @@
 import csv
 import json
 
-json_file = open("file.json", "w")
+json_file = open("land.json", "w")
 dict = {}
 i = 0
 
